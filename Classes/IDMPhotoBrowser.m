@@ -39,7 +39,7 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 
 	// Toolbar
 	UIToolbar *_toolbar;
-	UIBarButtonItem *_previousButton, *_nextButton, *_actionButton;
+	UIBarButtonItem *_saveButton, *_previousButton, *_nextButton, *_actionButton;
     UIBarButtonItem *_counterButton;
     UILabel *_counterLabel;
 
@@ -646,6 +646,8 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
         [_doneButton setImage:_doneButtonImage forState:UIControlStateNormal];
         _doneButton.contentMode = UIViewContentModeScaleAspectFit;
     }
+    
+    UIImage *saveButtonImage = [UIImage imageNamed:@"IDMPhotoBrowser.bundle/images/IDMPhotoBrowser_save.png"];
 
     UIImage *leftButtonImage = (_leftArrowImage == nil) ?
     [UIImage imageNamed:@"IDMPhotoBrowser.bundle/images/IDMPhotoBrowser_arrowLeft.png"]          : _leftArrowImage;
@@ -659,6 +661,9 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
     UIImage *rightButtonSelectedImage = (_rightArrowSelectedImage == nil) ?
     [UIImage imageNamed:@"IDMPhotoBrowser.bundle/images/IDMPhotoBrowser_arrowRightSelected.png"] : _rightArrowSelectedImage;
 
+    _saveButton = [[UIBarButtonItem alloc] initWithCustomView:[self customToolbarButtonImage:saveButtonImage
+                                                                               imageSelected:saveButtonImage
+                                                                                      action:@selector(actionSavePressed)]];
     // Arrows
     _previousButton = [[UIBarButtonItem alloc] initWithCustomView:[self customToolbarButtonImage:leftButtonImage
                                                                                    imageSelected:leftButtonSelectedImage
@@ -697,6 +702,7 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
                                                                   target:self
                                                                   action:@selector(actionButtonPressed:)];
     }
+    _actionButton.tintColor = UIColor.whiteColor;
 
     // Gesture
     _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureRecognized:)];
@@ -743,6 +749,7 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
     _toolbar = nil;
     _doneButton = nil;
     _previousButton = nil;
+    _saveButton = nil;
     _nextButton = nil;
 
     [super viewDidUnload];
@@ -851,8 +858,9 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
                                                                                target:self action:nil];
     NSMutableArray *items = [NSMutableArray new];
 
-    if (_displayActionButton)
-        [items addObject:fixedLeftSpace];
+//    if (_displayActionButton)
+//        [items addObject:fixedLeftSpace];
+    [items addObject:_saveButton];
     [items addObject:flexSpace];
 
     if (numberOfPhotos > 1 && _displayArrowButton)
@@ -1348,6 +1356,12 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
         [self prepareForClosePhotoBrowser];
         [self dismissPhotoBrowserAnimated:YES];
     }
+}
+
+-(void)actionSavePressed {
+    id <IDMPhoto> photo = [self photoAtIndex:_currentPageIndex];
+    
+    UIImageWriteToSavedPhotosAlbum(photo.underlyingImage, nil, nil, nil);
 }
 
 - (void)actionButtonPressed:(id)sender {
